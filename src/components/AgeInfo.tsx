@@ -43,6 +43,7 @@ import { useInfoCtr } from "../context/useInfoCtr";
  */
 
 // rbt 4. 使用第三方库react-tracked创建的container对象
+/* 
 export const AgeInfo = () => {
   //ToDo： container对象返回值时state和setState方法
   const [state, setState] = useInfoCtr();
@@ -55,6 +56,24 @@ export const AgeInfo = () => {
       <h2>age:{state.age}</h2>
       <p>{Math.random()}</p>
       <button onClick={addAge}>Happy birthday</button>
+    </div>
+  );
+}; 
+*/
+
+// rbt 5. 使用useReducer初始化的container对象（躺平版）
+export const AgeInfo = () => {
+  //ToDo： container对象返回值时state和setState方法
+  const [state, dispatch] = useInfoCtr();
+  //todo: 不需要手动创建action方法
+
+  return (
+    <div>
+      <h2>age:{state.age}</h2>
+      <p>{Math.random()}</p>
+      <button onClick={() => dispatch({ type: "addAge" })}>
+        Happy birthday
+      </button>
     </div>
   );
 };
