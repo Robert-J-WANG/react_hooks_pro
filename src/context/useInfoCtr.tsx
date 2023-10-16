@@ -88,3 +88,8 @@ export const InfoCtrProvider = (props: TProviderProps) => {
 export const useInfoCtr = () => {
   return infoCtr.useTracked();
 };
+
+// container返回的其他值：
+// const state = infoCtr.useTrackedState();
+// const dispatch = infoCtr.useUpdate();
+// const age = infoCtr.useSelector((state) => state.age);
