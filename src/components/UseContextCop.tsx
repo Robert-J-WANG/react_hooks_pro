@@ -119,8 +119,8 @@ export const UseContextCop = () => {
 // bug: 应为初始化时，使用了useState钩子,导致返回值是state和setState
 // todo : 解决方案：初始化时,是有更高级的useReducer,在useReducer钩子中定义好action
 
-// rbt:6. 终极方案：创建的container对象是使用useReducer钩子（内卷版）
+// rbt:6. 终极方案：创建的container对象是使用useImmerReducer钩子（内卷版）
 // hack : 使用useReducer钩子初始化对象，虽然解决了每次手动书写action的问题
 // bug : 但是，action方法里操作state时，都要保证原state不变
 // bug : 每次都要...展开原状态，当状态很多时，很繁琐
-// todo : 解决方案：使用useReducer钩子加第三方库use-immer
+// todo : 解决方案：使用第三方库immer,use-immer的useImmerReducer钩子
