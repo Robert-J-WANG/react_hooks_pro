@@ -532,8 +532,8 @@ export const Saving = () => {
 
 最优方案：
 
-1. 使用库react-tracked创建Container对象，
-2. 并使用库immer和useImmer提供的immerReducer和useImmerReducer 钩配置初始状态数据和action方法，
+1. 使用库react-tracked创建Container对象
+2. 并使用库immer和useImmer提供的immerReducer和useImmerReducer 钩子，配置初始状态数据和action方法
 3. 使用Container的provider包裹子组件，不需通过value携带数据
 4. 子组件调用Container.useTraced 钩子获取 [ state , dispatch ]并使用
 
