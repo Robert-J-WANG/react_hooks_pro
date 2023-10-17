@@ -5,8 +5,9 @@ import { Saving } from "./Saving";
 import { InfoCtrProvider } from "../context/useInfoCtr";
 
 //rbt: 1. 通过props 的方式，将状态数据传递给子组件
-/* 
-export const UseContextCop = () => {
+
+/*
+ export const UseContextCop = () => {
   const [age, setAge] = useState(18);
   const addAge = () => {
     setAge((prevAge) => prevAge + 1);
@@ -28,8 +29,8 @@ export const UseContextCop = () => {
       </div>
     </>
   );
-}; 
-*/
+};
+ */
 
 // rbt 2. 使用useContext传递state数据到任意子组件( 未封装 )
 /* 
