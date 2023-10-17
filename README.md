@@ -1,4 +1,4 @@
-## React context 
+## React context 隔空取物技能
 
 ####  特点：
 
@@ -75,7 +75,6 @@ export const Saving = () => {
     setSaving((prev) => prev + 1000);
   };
   return (
-    <>
       <div className="box">
         <h1>react useContext example</h1>
       </div>
@@ -85,7 +84,6 @@ export const Saving = () => {
       <div className="box">
         <Saving saving={saving} addSaving={addSaving} />
       </div>
-    </>
   );
 };
 ```
@@ -133,7 +131,6 @@ export const UseContextCop = () => {
     setSaving((prev) => prev + 1000);
   };
   return (
-    <>
       // 使用provider包裹，并通过value携带状态数据和方法
       <InfoContext.Provider value={{ age, addAge, saving, addSaving }}>
         <div className="box">
@@ -146,7 +143,6 @@ export const UseContextCop = () => {
           <Saving />
         </div>
       </InfoContext.Provider>
-    </>
   );
 };
 ```
@@ -167,7 +163,7 @@ export const UseContextCop = () => {
 
 #### 方法3：对Context对象的封装
 
-上面的方法中，状态信息和组件都在同一个文件中，代码结构很杂乱。可已经将context相关的代码抽封。
+上面的方法中，状态信息和组件都在同一个文件中，代码结构很杂乱。context相关的代码抽封。
 
 创建新的组件useInfoCtx，来封装context相关的代码
 
@@ -213,7 +209,6 @@ export const useInfoCtx = () => {
 ```tsx
 export const UseContextCop = () => {
   return (
-    <>
       <InfoCtxProvider>
         <div className="box">
           <h1>react useContext example</h1>
@@ -225,7 +220,6 @@ export const UseContextCop = () => {
           <Saving />
         </div>
       </InfoCtxProvider>
-    </>
   );
 };
 ```
@@ -243,6 +237,148 @@ export const UseContextCop = () => {
   );
 };
 ```
+
+==小心有坑：==
+
+==使用context时，当任意一个数据的改变，都会引起其他子组件的重绘，尽管次子组件并未使用到这个变化了的数据==
+
+##### 验证子组件的重绘：给每个子组件中添加随机数，每次重绘都会产生新的随机数
+
+```tsx
+ export const AgeInfo = () => {
+  const { age, addAge } = useInfoCtx();
+  return (
+    <div>
+      <h2>age:{age}</h2>
+      // 添加随机数，验证页面是否重绘
+      <p>{Math.random()}</p>
+      <button onClick={addAge}>Happy birthday</button>
+    </div>
+  );
+};
+```
+
+```tsx
+ export const Saving = () => {
+  const { saving, addSaving } = useInfoCtx();
+  return (
+    <div>
+      <h2>Saving:{saving}</h2>
+      <p>{Math.random()}</p>
+      <button onClick={addSaving}>add saving</button>
+    </div>
+  );
+}; 
+```
+
+#####  ==验证结果：==
+
+##### ==点击AgeInfo组件的Happy birthday按钮时，Saving组件生成新的随机数；点击Saving组件的add saving组件时，AgeInfo组件生成新的随机数==
+
+
+
+#### 方法4：使用第三方库*react-tracked*创建的container对象
+
+==使用方法类似于context，但没有重绘问题==
+
+安装库react-tracked
+
+```bash
+yarn add react-tracked
+```
+
+创建新的文件useInfoCtr，来保存container对象相关的代码。在文件中创建container对象，并传入用useState创建的初始对象。类似context，能使用provider包裹子组件。==注意，不需要创建action方法，不需要使用value携带状态数据==
+
+```tsx
+const useValue = () => {
+  return useState({ age: 18, saving: 1000 });
+};
+const infoCtr = createContainer(useValue);
+export const InfoCtrProvider = (props: TProviderProps) => {
+  return <infoCtr.Provider>{props.children}</infoCtr.Provider>;
+};
+export const useInfoCtr = () => {
+  return infoCtr.useTracked();
+};
+```
+
+父组件引入InfoCtrProvider钩子，包裹子组件
+
+```tsx
+export const UseContextCop = () => {
+  return (
+      <InfoCtrProvider>
+        <div className="box">
+          <h1>react useContext example</h1>
+        </div>
+        <div className="box">
+          <AgeInfo />
+        </div>
+        <div className="box">
+          <Saving />
+        </div>
+      </InfoCtrProvider>
+  );
+};
+```
+
+子组件调用useInfoCtr钩子，并使用，==注意：其返回的是状态数组 [state, setState]==，因为是使用useState钩子创建的初始对象。==需要在子组件中手动创建action方法==，来更新数据
+
+```tsx
+export const AgeInfo = () => {
+  //ToDo： container对象返回值时state和setState方法
+  const [state, setState] = useInfoCtr();
+  //todo: 需要手动创建action方法
+  const addAge = () => {
+    setState({ ...state, age: state.age + 1 });
+  };
+  return (
+    <div>
+      <h2>age:{state.age}</h2>
+      <p>{Math.random()}</p>
+      <button onClick={addAge}>Happy birthday</button>
+    </div>
+  );
+}; 
+```
+
+```tsx
+export const Saving = () => {
+  //ToDo： container对象返回值时state和setState方法
+  const [state, setState] = useInfoCtr();
+  //todo: 需要手动创建action方法
+  const addSaving = () => {
+    setState({ ...state, saving: state.saving + 1000 });
+  };
+  return (
+    <div>
+      <h2>Saving:{state.saving}</h2>
+      <p>{Math.random()}</p>
+      <button onClick={addSaving}>add saving</button>
+    </div>
+  );
+};
+```
+
+##### ==页面重绘的验证结果：==
+
+##### 点击AgeInfo组件的Happy birthday按钮时，Saving组件==不会生成新的随机数==；点击Saving组件的add saving组件时，AgeInfo组件==也不会生成新的随机数==
+
+-------------------
+
+==每个子组件都要手动创建action方法，好麻烦！！！==
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
