@@ -33,13 +33,13 @@ export const UseReducerCop = () => {
 import { useState } from "react";
 
 // 初始化数据
-const initialState = {
+const initState = {
   name: "Robert",
   score: 0,
 };
 export const UseReducerCop = () => {
   // 创建状态
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState(initState);
   // 创建action方法
   const increament = () => {
     setState((prevState) => ({ ...prevState, score: prevState.score + 1 }));
@@ -67,18 +67,18 @@ export const UseReducerCop = () => {
 
 ##### useReducer钩子接收3个参数：
 
-1. 第1个是reducer： action方法对象，用来设置如何更新状态
+1. 第1个是reducer函数： 用来设置如何更新状态
 
 2. 第2个是状态数据initialState:  状态数据的初始化，是一个状态对象
 
-3. 第3个是可选参数 ( 后面的方法中会使用到......)
+3. 第3个是initializer:可选参数 ( 后面的方法中会使用到......)
 
     
 
 ##### useReducer钩子返回2个属性：
 
 1. 更新后的状态数据state对象
-2. 更新状态的方法dispatch对象（可以取名为setState, 但其能使用分发功能）
+2. 更新状态的方法dispatch（可以取名为setState, 但其能使用分发功能）, 需要传入具体的实参action对象。该dispatch函数执行触发action，带来状态的变化
 
 ```tsx
 type Taction = {
@@ -87,11 +87,11 @@ type Taction = {
 };
 
 // 初始化数据
-const initialState = {
+const initState = {
   name: "Robert",
   score: 0,
 };
-const reducer = (state: typeof initialState, action: Taction) => {
+const reducer = (state: typeof initState, action: Taction) => {
   switch (action.type) {
     case "increment":
       return { ...state, score: state.score + action.payload };
@@ -103,7 +103,7 @@ const reducer = (state: typeof initialState, action: Taction) => {
 };
 export const UseReducerCop = () => {
   // 创建状态
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, initState);
 
   return (
     <>
@@ -149,17 +149,17 @@ type TAction = {
   type: "increment" | "decrement";
   payload: number;
 };
-const initialState = {
+const initState = {
   name: "Robert",
   score: 0,
 };
-const reducer = (state: typeof initialState, action: TAction) => {
+const reducer = (state: typeof initState, action: TAction) => {
   switch (action.type) {
     case "increment":
       state.score += action.payload;
       break;
     case "decrement":
-      state.score += action.payload;
+      state.score -= action.payload;
       break;
     default:
       break;
@@ -187,6 +187,71 @@ export const UseReducerCop = () => {
   );
 };
 ```
+
+#### 方法4：useReducer的第三个参数的使用
+
+1. useReducer的第三个参数initializer （initialFnc)，惰性初始化，提升性能(调用的时候初始化数据)
+2. 它是一个回调函数且一定要返回一个对象数据，目标就是做性能优化
+3. 实际应用不多，下面以存储状态到本地功能为例(刷新页面时，以本地存储的状态数据为初始数据渲染)
+
+```tsx
+type TAction = {
+  type: "increment" | "decrement";
+  payload: number;
+};
+const initState = {
+  name: "Robert",
+  score: 0,
+};
+const reducer = (state: typeof initState, action: TAction) => {
+  switch (action.type) {
+    case "increment":
+      state.score += action.payload;
+      break;
+    case "decrement":
+      state.score -= action.payload;
+      break;
+    default:
+      break;
+  }
+  // 将state对象转换为字符串格式，存储到本地
+  localStorage.setItem("my-state", JSON.stringify(state));
+};
+
+// 设置useImmerReducer的第三个参数，用来性能优化
+const initAction = () => {
+  // 获取本地存储
+  const res = JSON.parse(localStorage.getItem("my-state")!);
+
+  if (!!res) {
+    // 如果有本地存储，这返回本地存储的值作为状态的初始值
+    return res;
+  } else return initState; // 否则，则使用原先设置的初始状态
+};
+
+export const UseReducerCop = () => {
+  // 设置useImmerReducer的第三个参数，用于提升性能
+  const [state, dispatch] = useImmerReducer(reducer, initState, initAction);
+  return (
+    <>
+      <div className="box">
+        <h1>{state.name}</h1>
+      </div>
+      <div className="box">
+        <button onClick={() => dispatch({ type: "increment", payload: 2 })}>
+          👍
+        </button>
+        <h2>{state.score}</h2>
+        <button onClick={() => dispatch({ type: "decrement", payload: 2 })}>
+          👎
+        </button>
+      </div>
+    </>
+  );
+};
+```
+
+
 
 
 

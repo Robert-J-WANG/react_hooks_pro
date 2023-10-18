@@ -5,13 +5,13 @@ import { useImmerReducer } from "use-immer";
 
 /*
  // 初始化数据
-const initialState = {
+const initState = {
   name: "Robert",
   score: 0,
 };
 export const UseReducerCop = () => {
   // 创建状态
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState(initState);
   // 创建action方法
   const increment = () => {
     setState((prevState) => ({ ...prevState, score: prevState.score + 1 }));
@@ -43,11 +43,11 @@ type Taction = {
 };
 
 // 初始化数据
-const initialState = {
+const initState = {
   name: "Robert",
   score: 0,
 };
-const reducer = (state: typeof initialState, action: Taction) => {
+const reducer = (state: typeof initState, action: Taction) => {
   switch (action.type) {
     case "increment":
       return { ...state, score: state.score + action.payload };
@@ -59,7 +59,7 @@ const reducer = (state: typeof initialState, action: Taction) => {
 };
 export const UseReducerCop = () => {
   // 创建状态
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, initState);
 
   return (
     <>
@@ -81,22 +81,24 @@ export const UseReducerCop = () => {
 */
 
 /* ------------ //rbt: 3. 使用useImmerReducer钩子 ----------- */
+/* 
 type TAction = {
   type: "increment" | "decrement";
   payload: number;
 };
-const initialState = {
+const initState = {
   name: "Robert",
   score: 0,
 };
-const reducer = (state: typeof initialState, action: TAction) => {
+const reducer = (state: typeof initState, action: TAction) => {
   switch (action.type) {
     case "increment":
       state.score += action.payload;
       break;
     case "decrement":
-      state.score += action.payload;
+      state.score -= action.payload;
       break;
+
     default:
       break;
   }
@@ -104,8 +106,67 @@ const reducer = (state: typeof initialState, action: TAction) => {
 
 export const UseReducerCop = () => {
   // 创建状态
-  const [state, dispatch] = useImmerReducer(reducer, initialState);
+  const [state, dispatch] = useImmerReducer(reducer, initState);
+  console.log(typeof state);
 
+  return (
+    <>
+      <div className="box">
+        <h1>{state.name}</h1>
+      </div>
+      <div className="box">
+        <button onClick={() => dispatch({ type: "increment", payload: 2 })}>
+          👍
+        </button>
+        <h2>{state.score}</h2>
+        <button onClick={() => dispatch({ type: "decrement", payload: 2 })}>
+          👎
+        </button>
+      </div>
+    </>
+  );
+}; 
+*/
+
+/* --------//rbt: 4. 使用useReducer钩子的第三个参数initialFnc的使用 --------*/
+type TAction = {
+  type: "increment" | "decrement";
+  payload: number;
+};
+const initState = {
+  name: "Robert",
+  score: 0,
+};
+const reducer = (state: typeof initState, action: TAction) => {
+  switch (action.type) {
+    case "increment":
+      state.score += action.payload;
+      break;
+    case "decrement":
+      state.score -= action.payload;
+      break;
+
+    default:
+      break;
+  }
+  // 将state对象转换为字符串格式，存储到本地
+  localStorage.setItem("my-state", JSON.stringify(state));
+};
+
+// 设置useImmerReducer的第三个参数，用来性能优化
+const initAction = () => {
+  // 获取本地存储
+  const res = JSON.parse(localStorage.getItem("my-state")!);
+
+  if (!!res) {
+    // 如果有本地存储，这返回本地存储的值作为状态的初始值
+    return res;
+  } else return initState; // 否则，则使用原先设置的初始状态
+};
+
+export const UseReducerCop = () => {
+  // 设置useImmerReducer的第三个参数，用于提升性能
+  const [state, dispatch] = useImmerReducer(reducer, initState, initAction);
   return (
     <>
       <div className="box">
